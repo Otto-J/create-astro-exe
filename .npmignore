@@ -1,0 +1,51 @@
+# Development files
+.gemini/
+.cursor/
+.specify/
+八戒.md
+唐僧.md
+悟空.md
+沙僧.md
+
+# Documentation (keep README.md)
+docs/
+
+# Test files
+test/
+tests/
+*.test.js
+*.spec.js
+
+# Development dependencies
+.eslintrc*
+.prettierrc*
+vitest.config.*
+
+# Git files (but keep template/.gitignore)
+.git/
+.gitattributes
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# But include template/.gitignore explicitly
+!template/.gitignore

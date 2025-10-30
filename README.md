@@ -53,6 +53,7 @@ my-project/
 ### 本地测试
 
 1. 克隆项目并安装依赖：
+
 ```bash
 git clone <repository-url>
 cd create-astro-exe
@@ -60,11 +61,13 @@ npm install
 ```
 
 2. 链接到全局：
+
 ```bash
 npm link
 ```
 
 3. 测试 CLI 工具：
+
 ```bash
 node bin/create-astro-exe.js test-project
 ```
@@ -79,11 +82,13 @@ node bin/create-astro-exe.js test-project
 ## 发布到 npm
 
 1. 登录 npm：
+
 ```bash
 npm login
 ```
 
 2. 发布包：
+
 ```bash
 npm publish --access public
 ```

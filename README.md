@@ -19,16 +19,12 @@
 npm create @web.worker/astro-exe my-project
 ```
 
-### 带参数使用
+### 参数说明
 
-```bash
-npm create @web.worker/astro-exe my-project --no-install --no-git
-```
+该工具不接受命令行参数配置安装与 Git 行为，采用交互式方式收集配置；如果在不支持参数传递的环境（例如部分 `npm create` 场景）中使用，将采用默认值：
 
-### 支持的参数
-
-- `--no-install`: 跳过依赖安装
-- `--no-git`: 跳过 Git 仓库初始化
+- 默认安装依赖（可在交互中取消）
+- 默认初始化 Git 仓库，但不会自动提交（不执行 `git add` / `git commit`）
 
 ## 生成的项目结构
 
@@ -106,7 +102,7 @@ npm publish --access public
 - ✅ 交互式配置项目信息
 - ✅ 生成完整可运行的 Astro 项目
 - ✅ 模板变量正确替换
-- ✅ 可选的依赖安装和 Git 初始化
+- ✅ 交互式依赖安装与 Git 初始化（默认初始化但不自动提交）
 - ✅ 生成的项目可正常启动开发服务器
 
 ## 许可证

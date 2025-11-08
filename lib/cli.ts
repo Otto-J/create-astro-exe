@@ -14,7 +14,7 @@ interface ProjectConfig {
   description: string
   author: string
   installDeps: boolean
-  packageManager?: 'npm' | 'yarn' | 'pnpm'
+  packageManager?: 'npm' | 'yarn' | 'pnpm' | 'bun'
   initGit: boolean
 }
 
@@ -72,7 +72,7 @@ export class CLI {
 
     await this.createProject(targetDir, config)
 
-    this.showCompletionMessage(projectName)
+    this.showCompletionMessage(projectName, config.installDeps ? config.packageManager : undefined)
   }
 
   private async promptConfig(projectName: string): Promise<ProjectConfig> {
@@ -105,7 +105,7 @@ export class CLI {
         type: 'list',
         name: 'packageManager',
         message: 'Choose a package manager:',
-        choices: ['npm', 'yarn', 'pnpm'],
+        choices: ['npm', 'yarn', 'pnpm', 'bun'],
         default: 'npm',
         when: (answers: any) => answers.installDeps === true,
       },
@@ -139,7 +139,7 @@ export class CLI {
       if (config.installDeps) {
         spinner.text = 'Installing dependencies...'
         const pm = config.packageManager || 'npm'
-        const installCmd = pm === 'yarn' ? 'yarn' : `${pm} install`
+        const installCmd = pm === 'yarn' ? 'yarn' : pm === 'bun' ? 'bun install' : `${pm} install`
         await executeCommand(installCmd, { cwd: targetDir })
       }
 
@@ -155,13 +155,17 @@ export class CLI {
     }
   }
 
-  private showCompletionMessage(projectName: string): void {
+  private showCompletionMessage(projectName: string, pm?: 'npm' | 'yarn' | 'pnpm' | 'bun'): void {
     console.log()
     console.log(chalk.green('✨ Project created successfully!'))
     console.log()
     console.log('Next steps:')
     console.log(chalk.cyan(`  cd ${projectName}`))
-    console.log(chalk.cyan('  npm run dev'))
+    if (pm) {
+      console.log(chalk.cyan(`  ${pm} run dev`))
+    } else {
+      console.log(chalk.cyan('  npm/yarn/pnpm/bun run dev'))
+    }
     console.log()
     console.log('Happy coding! 🎉')
   }

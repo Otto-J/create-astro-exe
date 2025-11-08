@@ -21,10 +21,20 @@ npm create @web.worker/astro-exe my-project
 
 ### 参数说明
 
-该工具不接受命令行参数配置安装与 Git 行为，采用交互式方式收集配置；如果在不支持参数传递的环境（例如部分 `npm create` 场景）中使用，将采用默认值：
+该工具采用交互式方式收集配置；如果在不支持参数传递的环境（例如部分 `npm create` 场景）中使用，将采用默认值：
 
 - 默认安装依赖（可在交互中取消）
 - 默认初始化 Git 仓库，但不会自动提交（不执行 `git add` / `git commit`）
+ - 安装依赖时可选择包管理器（npm / yarn / pnpm），默认使用 npm
+
+### 交互项说明
+
+- Project name：项目名称（可在命令行传入或交互输入）
+- Project description：默认值为“<projectName> - Astro application”，可编辑
+- Author name：默认从 `git config --global user.name` 回填，若未设置则为空
+- Install dependencies：是否安装依赖（默认是）
+- Choose a package manager：选择 npm / yarn / pnpm（仅当安装依赖为是时出现，默认 npm）
+- Initialize git repository：是否初始化 Git（默认是）
 
 ## 生成的项目结构
 
@@ -62,10 +72,11 @@ npm install
 npm link
 ```
 
-3. 测试 CLI 工具：
+3. 构建并测试 CLI 工具：
 
 ```bash
-node bin/create-astro-exe.js test-project
+npm run build
+node dist/create-astro-exe.cjs test-project
 ```
 
 ### 项目结构
@@ -103,6 +114,7 @@ npm publish --access public
 - ✅ 生成完整可运行的 Astro 项目
 - ✅ 模板变量正确替换
 - ✅ 交互式依赖安装与 Git 初始化（默认初始化但不自动提交）
+- ✅ 依赖安装支持包管理器选择（npm / yarn / pnpm）
 - ✅ 生成的项目可正常启动开发服务器
 
 ## 许可证

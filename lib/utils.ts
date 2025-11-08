@@ -4,10 +4,7 @@ import fs from 'fs-extra'
 
 const execAsync = promisify(exec)
 
-/**
- * 验证项目名称
- */
-export function validateProjectName(name) {
+export function validateProjectName(name: string): true | string {
   if (!name) {
     return 'Project name is required'
   }
@@ -23,36 +20,25 @@ export function validateProjectName(name) {
   return true
 }
 
-/**
- * 检查目录是否存在
- */
-export async function checkDirectoryExists(dirPath) {
+export async function checkDirectoryExists(dirPath: string): Promise<boolean> {
   try {
     const stat = await fs.stat(dirPath)
     return stat.isDirectory()
-  }
-  catch {
+  } catch {
     return false
   }
 }
 
-/**
- * 执行命令
- */
-export async function executeCommand(command, options = {}) {
+export async function executeCommand(command: string, options: { cwd?: string } = {}): Promise<{ stdout: string; stderr: string }> {
   try {
     const { stdout, stderr } = await execAsync(command, options)
     return { stdout, stderr }
-  }
-  catch (error) {
-    throw new Error(`Command failed: ${command}\n${error.message}`)
+  } catch (error) {
+    throw new Error(`Command failed: ${command}\n${(error as Error).message}`)
   }
 }
 
-/**
- * 格式化项目名称为合法的包名
- */
-export function formatPackageName(name) {
+export function formatPackageName(name: string): string {
   return name
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, '-')
@@ -60,9 +46,6 @@ export function formatPackageName(name) {
     .replace(/^-|-$/g, '')
 }
 
-/**
- * 获取当前时间戳
- */
-export function getCurrentTimestamp() {
+export function getCurrentTimestamp(): string {
   return new Date().toISOString()
 }

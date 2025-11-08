@@ -8,7 +8,7 @@
   "homepage": "https://github.com/web-worker/create-astro-exe#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/web-worker/create-astro-exe.git"
+    "url": "git+https://github.com/web-worker/create-astro-exe.git"
   },
   "bugs": {
     "url": "https://github.com/web-worker/create-astro-exe/issues"
@@ -21,11 +21,12 @@
     "create-app"
   ],
   "bin": {
-    "create-astro-exe": "./bin/create-astro-exe.js"
+    "create-astro-exe": "dist/create-astro-exe.cjs"
   },
   "files": [
     "README.md",
     "bin",
+    "dist",
     "lib",
     "template"
   ],
@@ -34,10 +35,11 @@
     "npm": ">=7.0.0"
   },
   "scripts": {
-    "test": "vitest",
+    "build": "tsdown",
+    "test": "vitest run",
     "lint": "eslint .",
     "format": "eslint --fix",
-    "prepublishOnly": "npm run lint && npm run test"
+    "prepublishOnly": "npm run build && npm run lint && npm run test"
   },
   "dependencies": {
     "chalk": "^5.3.0",
@@ -50,6 +52,8 @@
     "eslint": "^9",
     "eslint-plugin-format": "^1.0.2",
     "prettier": "^3.1.1",
+    "tsdown": "^0.16.1",
+    "typescript": "^5.9.3",
     "vitest": "^1.1.0"
   }
 }

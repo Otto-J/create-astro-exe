@@ -46,5 +46,6 @@ Thumbs.db
 *.swp
 *.swo
 
-# But include template/.gitignore explicitly
-!template/.gitignore
+# Explicitly include special template files to bypass npm ignore
+!template/gitignore.template
+!template/npmrc

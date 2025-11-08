@@ -3,26 +3,36 @@ import { fileURLToPath } from 'node:url'
 import chalk from 'chalk'
 import inquirer from 'inquirer'
 import ora from 'ora'
-import { TemplateProcessor } from './template.js'
-import { checkDirectoryExists, executeCommand, validateProjectName } from './utils.js'
+import { TemplateProcessor } from './template'
+import { checkDirectoryExists, executeCommand, validateProjectName } from './utils'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+interface ProjectConfig {
+  projectName: string
+  description: string
+  author: string
+  installDeps: boolean
+  packageManager?: 'npm' | 'yarn' | 'pnpm'
+  initGit: boolean
+}
+
 export class CLI {
+  private templateProcessor: TemplateProcessor
+
   constructor() {
     this.templateProcessor = new TemplateProcessor()
   }
 
-  async run(args) {
+  async run(args: string[]): Promise<void> {
     console.log(chalk.cyan('🚀 Create Astro Exe'))
     console.log(chalk.gray('Creating a new Astro application...\n'))
 
-    // 解析项目名称
     let projectName = args[0]
 
     if (!projectName) {
-      const { name } = await inquirer.prompt([
+      const { name } = await inquirer.prompt<{ name: string }>([
         {
           type: 'input',
           name: 'name',
@@ -32,9 +42,7 @@ export class CLI {
         },
       ])
       projectName = name
-    }
-    else {
-      // 验证命令行提供的项目名
+    } else {
       const validation = validateProjectName(projectName)
       if (validation !== true) {
         console.error(chalk.red(`Error: ${validation}`))
@@ -44,9 +52,8 @@ export class CLI {
 
     const targetDir = path.resolve(process.cwd(), projectName)
 
-    // 检查目录是否存在
     if (await checkDirectoryExists(targetDir)) {
-      const { overwrite } = await inquirer.prompt([
+      const { overwrite } = await inquirer.prompt<{ overwrite: boolean }>([
         {
           type: 'confirm',
           name: 'overwrite',
@@ -61,35 +68,46 @@ export class CLI {
       }
     }
 
-    // 获取项目配置
     const config = await this.promptConfig(projectName)
 
-    // 创建项目
     await this.createProject(targetDir, config)
 
-    // 显示完成信息
     this.showCompletionMessage(projectName)
   }
 
-  async promptConfig(projectName) {
+  private async promptConfig(projectName: string): Promise<ProjectConfig> {
+    let defaultAuthor = ''
+    try {
+      const { stdout } = await executeCommand('git config --global user.name')
+      defaultAuthor = stdout.trim()
+    } catch {}
+
     const answers = await inquirer.prompt([
       {
         type: 'input',
         name: 'description',
         message: 'Project description:',
-        default: 'My awesome Astro application',
+        default: `${projectName} - Astro application`,
       },
       {
         type: 'input',
         name: 'author',
         message: 'Author name:',
-        default: '',
+        default: defaultAuthor || '',
       },
       {
         type: 'confirm',
         name: 'installDeps',
         message: 'Install dependencies?',
         default: true,
+      },
+      {
+        type: 'list',
+        name: 'packageManager',
+        message: 'Choose a package manager:',
+        choices: ['npm', 'yarn', 'pnpm'],
+        default: 'npm',
+        when: (answers: any) => answers.installDeps === true,
       },
       {
         type: 'confirm',
@@ -105,39 +123,39 @@ export class CLI {
     }
   }
 
-  async createProject(targetDir, config) {
+  private async createProject(targetDir: string, config: ProjectConfig): Promise<void> {
     const spinner = ora('Creating project...').start()
 
     try {
-      // 获取模板目录
       const templateDir = path.resolve(__dirname, '../template')
 
-      // 复制模板文件
       spinner.text = 'Copying template files...'
-      await this.templateProcessor.copyTemplate(templateDir, targetDir, config)
+      await this.templateProcessor.copyTemplate(templateDir, targetDir, {
+        projectName: config.projectName,
+        description: config.description,
+        author: config.author,
+      })
 
-      // 安装依赖
       if (config.installDeps) {
         spinner.text = 'Installing dependencies...'
-        await executeCommand('npm install', { cwd: targetDir })
+        const pm = config.packageManager || 'npm'
+        const installCmd = pm === 'yarn' ? 'yarn' : `${pm} install`
+        await executeCommand(installCmd, { cwd: targetDir })
       }
 
-      // 初始化 Git（仅执行 git init，不进行提交）
       if (config.initGit) {
         spinner.text = 'Initializing git repository...'
         await executeCommand('git init', { cwd: targetDir })
-        // 根据产品要求：应用不接受用户的参数，默认仅初始化仓库，不执行 add 或 commit
       }
 
       spinner.succeed('Project created successfully!')
-    }
-    catch (error) {
+    } catch (error) {
       spinner.fail('Failed to create project')
       throw error
     }
   }
 
-  showCompletionMessage(projectName) {
+  private showCompletionMessage(projectName: string): void {
     console.log()
     console.log(chalk.green('✨ Project created successfully!'))
     console.log()

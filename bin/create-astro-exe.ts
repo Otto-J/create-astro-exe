@@ -6,7 +6,8 @@ async function main(): Promise<void> {
   try {
     const cli = new CLI()
     await cli.run(process.argv.slice(2))
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error:', (error as Error).message)
     process.exit(1)
   }

@@ -25,7 +25,7 @@ npm create @web.worker/astro-exe my-project
 
 - 默认安装依赖（可在交互中取消）
 - 默认初始化 Git 仓库，但不会自动提交（不执行 `git add` / `git commit`）
- - 安装依赖时可选择包管理器（npm / yarn / pnpm），默认使用 npm
+- 安装依赖时可选择包管理器（npm / yarn / pnpm），默认使用 npm
 
 ### 交互项说明
 

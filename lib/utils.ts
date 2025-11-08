@@ -24,16 +24,18 @@ export async function checkDirectoryExists(dirPath: string): Promise<boolean> {
   try {
     const stat = await fs.stat(dirPath)
     return stat.isDirectory()
-  } catch {
+  }
+  catch {
     return false
   }
 }
 
-export async function executeCommand(command: string, options: { cwd?: string } = {}): Promise<{ stdout: string; stderr: string }> {
+export async function executeCommand(command: string, options: { cwd?: string } = {}): Promise<{ stdout: string, stderr: string }> {
   try {
     const { stdout, stderr } = await execAsync(command, options)
     return { stdout, stderr }
-  } catch (error) {
+  }
+  catch (error) {
     throw new Error(`Command failed: ${command}\n${(error as Error).message}`)
   }
 }

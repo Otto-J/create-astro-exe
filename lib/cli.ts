@@ -19,7 +19,7 @@ interface ProjectConfig {
 }
 
 export class CLI {
-  private templateProcessor: TemplateProcessor
+  public templateProcessor: TemplateProcessor
 
   constructor() {
     this.templateProcessor = new TemplateProcessor()
@@ -42,7 +42,8 @@ export class CLI {
         },
       ])
       projectName = name
-    } else {
+    }
+    else {
       const validation = validateProjectName(projectName)
       if (validation !== true) {
         console.error(chalk.red(`Error: ${validation}`))
@@ -80,7 +81,8 @@ export class CLI {
     try {
       const { stdout } = await executeCommand('git config --global user.name')
       defaultAuthor = stdout.trim()
-    } catch {}
+    }
+    catch {}
 
     const answers = await inquirer.prompt([
       {
@@ -123,7 +125,7 @@ export class CLI {
     }
   }
 
-  private async createProject(targetDir: string, config: ProjectConfig): Promise<void> {
+  public async createProject(targetDir: string, config: ProjectConfig): Promise<void> {
     const spinner = ora('Creating project...').start()
 
     try {
@@ -149,7 +151,8 @@ export class CLI {
       }
 
       spinner.succeed('Project created successfully!')
-    } catch (error) {
+    }
+    catch (error) {
       spinner.fail('Failed to create project')
       throw error
     }
@@ -163,7 +166,8 @@ export class CLI {
     console.log(chalk.cyan(`  cd ${projectName}`))
     if (pm) {
       console.log(chalk.cyan(`  ${pm} run dev`))
-    } else {
+    }
+    else {
       console.log(chalk.cyan('  npm/yarn/pnpm/bun run dev'))
     }
     console.log()

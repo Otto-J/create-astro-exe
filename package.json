@@ -1,7 +1,7 @@
 {
   "name": "@web.worker/create-astro-exe",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Create Astro applications with a single command",
   "author": "Web Worker Team",
   "license": "MIT",
@@ -28,7 +28,19 @@
     "bin",
     "dist",
     "lib",
-    "template"
+    "template/AGENTS.md",
+    "template/README.md",
+    "template/astro.config.mjs",
+    "template/config",
+    "template/data",
+    "template/db",
+    "template/gitignore.template",
+    "template/npmrc",
+    "template/package.json",
+    "template/public",
+    "template/scripts",
+    "template/src",
+    "template/tsconfig.json"
   ],
   "engines": {
     "node": ">=16.0.0",
@@ -37,11 +49,13 @@
   "scripts": {
     "build": "tsdown",
     "test": "vitest run",
+    "types": "tsc --noEmit",
     "lint": "eslint .",
     "format": "eslint --fix",
-    "prepublishOnly": "npm run build && npm run lint && npm run test"
+    "prepublishOnly": "npm run build && npm run lint && npm run types && npm run test"
   },
   "dependencies": {
+    "@types/node": "^22.19.0",
     "chalk": "^5.3.0",
     "fs-extra": "^11.2.0",
     "inquirer": "^9.2.12",
@@ -49,6 +63,8 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^6.1.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.7",
     "eslint": "^9",
     "eslint-plugin-format": "^1.0.2",
     "prettier": "^3.1.1",

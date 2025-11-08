@@ -30,6 +30,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+*.tgz
 
 # Temporary files
 *.tmp
@@ -49,3 +50,18 @@ Thumbs.db
 # Explicitly include special template files to bypass npm ignore
 !template/gitignore.template
 !template/npmrc
+
+# Exclude generated or heavy local artifacts
+my-astro-app/
+web.worker-create-astro-exe-*.tgz
+
+# Exclude large/unnecessary files inside the template
+template/node_modules/
+template/dist/
+template/.astro/
+template/.cache/
+template/.vercel/
+template/.next/
+template/.svelte-kit/
+template/pnpm-lock.yaml
+template/release/

@@ -6,5 +6,5 @@ export default defineConfig({
   outDir: 'dist',
   clean: true,
   dts: false, // No need for dts in CLI
-  outExtension: () => ({ js: '.js' })
+  outExtension: () => ({ js: '.js' }),
 })

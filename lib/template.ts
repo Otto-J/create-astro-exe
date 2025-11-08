@@ -15,7 +15,8 @@ export class TemplateProcessor {
         const targetSubDir = path.join(targetDir, item)
         await fs.ensureDir(targetSubDir)
         await this.copyTemplate(srcPath, targetSubDir, variables)
-      } else {
+      }
+      else {
         // 处理特殊文件和 .template 后缀
         let targetName = item
 

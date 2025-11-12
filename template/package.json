@@ -10,6 +10,7 @@
     "build": "astro build --remote",
     "preview": "astro preview",
     "astro": "astro",
+    "astro:check": "astro check",
     "deliver:mac": "node ./scripts/package-zip.mjs mac",
     "deliver:win": "node ./scripts/package-zip.mjs win",
     "deliver:all": "node ./scripts/package-zip.mjs all"
@@ -19,13 +20,16 @@
     "@astrojs/node": "^9.5.0",
     "@tailwindcss/vite": "^4.1.17",
     "astro": "^5.15.4",
-    "tailwindcss": "^4.1.17"
+    "drizzle-orm": "^0.44.7",
+    "tailwindcss": "^4.1.17",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.5",
+    "@tailwindcss/typography": "^0.5.19",
     "archiver": "^5.3.2",
-    "license-checker": "^25.0.1",
     "daisyui": "^5.4.7",
+    "license-checker": "^25.0.1",
     "typescript": "^5.0.0"
   }
 }

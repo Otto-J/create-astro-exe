@@ -1,23 +1,60 @@
 ---
-import '../styles/global.css'
+import "../styles/global.css";
+import { actions } from "astro:actions";
 export interface Props {
-	title: string;
+  title: string;
+  showNav?: boolean;
 }
 
-const { title } = Astro.props;
+const { title, showNav = true } = Astro.props;
+// 服务端获取当前登录用户，用于顶部导航显示与退出按钮
 ---
 
-<!DOCTYPE html>
-<html lang="zh-CN">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="description" content="Astro description">
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
-	</head>
-	<body>
-		<slot />
-	</body>
+<!doctype html>
+<html lang="zh-CN" data-theme="lemonade">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Astro description" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body class="retro-paper">
+    {
+      showNav ? (
+        <nav class="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50">
+          <div class="flex-1">
+            <a href="/" class="btn btn-ghost normal-case text-xl">
+              Demo 笔记
+            </a>
+          </div>
+          <div class="flex-none gap-2"></div>
+        </nav>
+      ) : null
+    }
+    <main>
+      <slot />
+    </main>
+    <!-- 登出行为：调用 Actions 并跳转到登录页 -->
+    <script>
+      import { actions } from "astro:actions";
+      document
+        .getElementById("logoutBtn")
+        ?.addEventListener("click", async () => {
+          try {
+            await actions.logout();
+          } catch (e) {
+            // 忽略错误，仍然跳转
+          }
+          window.location.href = "/auth";
+        });
+    </script>
+  </body>
 </html>
+<style is:global>
+  html,
+  body {
+    height: 100%;
+  }
+</style>

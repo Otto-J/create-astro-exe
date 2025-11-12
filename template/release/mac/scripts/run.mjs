@@ -117,9 +117,15 @@ async function main() {
 
   // Load env from ./config/.env if present (fallback to process.env)
   const envFromFile = parseEnvFile(path.join(rootDir, 'config', '.env'));
-  let HOST = envFromFile.HOST || process.env.HOST || '127.0.0.1';
-  const START_PORT = envFromFile.PORT || process.env.PORT || '4321';
-  const NODE_ENV = envFromFile.NODE_ENV || process.env.NODE_ENV || 'production';
+  // Merge all keys from file into process.env so Astro runtime can read them
+  for (const [k, v] of Object.entries(envFromFile)) {
+    if (typeof v === 'string' && v.length > 0) {
+      process.env[k] = v;
+    }
+  }
+  let HOST = process.env.HOST || '127.0.0.1';
+  const START_PORT = process.env.PORT || '4321';
+  const NODE_ENV = process.env.NODE_ENV || 'production';
 
   process.env.NODE_ENV = NODE_ENV;
 

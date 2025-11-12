@@ -1,10 +1,14 @@
 @astrojs/check@0.9.5 | undefined | https://github.com/withastro/language-tools
 @astrojs/db@0.18.2 | undefined | https://github.com/withastro/astro
 @astrojs/node@9.5.0 | undefined | https://github.com/withastro/astro
+@tailwindcss/typography@0.5.19 | undefined | https://github.com/tailwindlabs/tailwindcss-typography
 @tailwindcss/vite@4.1.17 | undefined | https://github.com/tailwindlabs/tailwindcss
 archiver@5.3.2 | undefined | https://github.com/archiverjs/node-archiver
 astro@5.15.4 | undefined | https://github.com/withastro/astro
 daisyui@5.4.7 | undefined | https://github.com/saadeghi/daisyui
+demo1-1@0.0.1 | undefined | 
+drizzle-orm@0.44.7 | undefined | https://github.com/drizzle-team/drizzle-orm
 license-checker@25.0.1 | undefined | https://github.com/davglass/license-checker
 tailwindcss@4.1.17 | undefined | https://github.com/tailwindlabs/tailwindcss
 typescript@5.9.3 | undefined | https://github.com/microsoft/TypeScript
+zod@4.1.12 | undefined | https://github.com/colinhacks/zod

@@ -1,2 +1,51 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 @plugin "daisyui";
+@plugin "daisyui/theme" {
+  name: "retro";
+  default: true;
+  --color-primary: #cc9234;
+  --color-primary-content: #fff;
+  /* 提高卡片与纸张背景的对比度：将基础卡片底色调亮为几乎纯白 */
+  --color-base-100: #ffffff; /* 卡片与组件默认底色（更高对比） */
+  --paper-bg: #efe3bb; /* 旧报纸米黄 */
+  --paper-ink: #3e3a33; /* 深棕黑 */
+}
+/* 人文复古文革纸张风：旧报纸米黄底 + 极轻颗粒纹理 */
+.retro-paper {
+  background-color: var(--paper-bg);
+  background-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.03) 0%,
+    transparent 20%
+  );
+}
+
+/* 极轻纸张颗粒纹理 */
+.paper-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  background-repeat: repeat;
+}
+
+/* 提升卡片对比度：不改变 main 的纸张背景，仅优化卡片的可读性与层次 */
+:where(.card) {
+  background-color: var(--color-base-100);
+  color: var(--paper-ink);
+  border: 1px solid color-mix(in oklab, var(--paper-ink) 18%, transparent);
+  box-shadow: 0 2px 6px rgba(62, 58, 51, 0.14),
+    0 1px 0 rgba(62, 58, 51, 0.06) inset;
+}
+
+:where(.card:hover) {
+  box-shadow: 0 4px 12px rgba(62, 58, 51, 0.18),
+    0 1px 0 rgba(62, 58, 51, 0.08) inset;
+}
+
+/* 卡片正文与标题的对比度进一步优化 */
+:where(.card .card-title) {
+  color: color-mix(in oklab, var(--paper-ink) 94%, black 6%);
+}
+
+:where(.card .card-body) {
+  color: color-mix(in oklab, var(--paper-ink) 88%, black 12%);
+}

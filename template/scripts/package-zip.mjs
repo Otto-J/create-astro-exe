@@ -6,6 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import archiver from 'archiver';
+import { spawnSync as spawn } from 'node:child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -115,6 +116,98 @@ function generateLicenses() {
   return lines.join('\n') + '\n';
 }
 
+// Find external (unbundled) packages by scanning dist/server code
+function findExternalsInDist(distServerDir) {
+  const builtins = new Set([
+    'node:fs','fs','node:path','path','node:url','url','node:http','http','node:https','https','node:net','net','node:os','os','node:stream','stream','node:zlib','zlib','events','crypto','buffer','timers','tty','child_process','cluster','dns','module','process','worker_threads'
+  ]);
+  const exts = new Set();
+  const isBare = (s) => s && !s.startsWith('.') && !s.startsWith('/') && !s.startsWith('data:') && !s.startsWith('node:');
+  const scanFile = (filePath) => {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const importRe = /import\s+(?:[^'"\n]+\s+from\s+)?['"]([^'"\n]+)['"];?/g;
+    const dynImportRe = /import\(\s*['"]([^'"\n]+)['"]\s*\)/g;
+    const requireRe = /require\(\s*['"]([^'"\n]+)['"]\s*\)/g;
+    for (const re of [importRe, dynImportRe, requireRe]) {
+      let m;
+      while ((m = re.exec(content))) {
+        const spec = m[1];
+        if (isBare(spec) && !builtins.has(spec)) {
+          exts.add(spec);
+        }
+      }
+    }
+  };
+  const walk = (dir) => {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir)) {
+      const p = path.join(dir, entry);
+      const st = fs.statSync(p);
+      if (st.isDirectory()) walk(p);
+      else if (/\.(m?js|cjs|ts)$/.test(entry)) scanFile(p);
+    }
+  };
+  walk(distServerDir);
+  return Array.from(exts).sort();
+}
+
+function resolveInstalledVersion(pkgName) {
+  try {
+    const res = spawn('pnpm', ['ls', pkgName, '--depth=0', '--json'], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'], shell: process.platform === 'win32' });
+    if (res.status === 0) {
+      const arr = JSON.parse(res.stdout.toString('utf-8'));
+      // pnpm ls --json may output array per importer
+      const item = Array.isArray(arr) ? arr.find(Boolean) : arr;
+      const dep = (item && item.dependencies && item.dependencies[pkgName]) || null;
+      const version = dep && (dep.version || dep.from);
+      if (version) return version;
+    }
+  } catch {}
+  return null;
+}
+
+function createMinimalRuntimePackage(outDir, externals) {
+  const rootPkg = readJSON(path.join(root, 'package.json'));
+  const depsSrc = { ...(rootPkg.dependencies || {}), ...(rootPkg.optionalDependencies || {}) };
+  const runtimeDeps = {};
+  const missing = [];
+  for (const name of externals) {
+    if (depsSrc[name]) {
+      runtimeDeps[name] = depsSrc[name];
+    } else {
+      // try resolve installed version from pnpm ls
+      const ver = resolveInstalledVersion(name);
+      if (ver) {
+        runtimeDeps[name] = ver;
+      } else {
+        missing.push(name);
+      }
+    }
+  }
+  if (missing.length) {
+    console.warn(`[package-zip] WARN: Some externals not found in root dependencies and could not resolve version: ${missing.join(', ')}`);
+    console.warn('[package-zip] You may need to add them to package.json explicitly to ensure install succeeds.');
+  }
+  const runtimePkg = {
+    name: `${rootPkg.name || 'app'}-runtime`,
+    private: true,
+    type: 'module',
+    engines: { node: '>=20' },
+    scripts: { start: 'node ./scripts/run.mjs' },
+    dependencies: runtimeDeps,
+    packageManager: rootPkg.packageManager || undefined,
+  };
+  writeFile(path.join(outDir, 'package.json'), JSON.stringify(runtimePkg, null, 2));
+  // Copy lockfile if present to pin versions
+  const lockPath = path.join(root, 'pnpm-lock.yaml');
+  if (fs.existsSync(lockPath)) {
+    copy(lockPath, path.join(outDir, 'pnpm-lock.yaml'));
+  }
+  // Copy .npmrc/.pnpmrc if present to preserve registry settings
+  const npmrc = path.join(root, '.npmrc');
+  if (fs.existsSync(npmrc)) copy(npmrc, path.join(outDir, '.npmrc'));
+}
+
 async function main() {
   const arg = (process.argv[2] || 'all').toLowerCase();
   const platforms = arg === 'all' ? ['mac', 'win'] : [arg];
@@ -161,12 +254,41 @@ async function main() {
       copy(path.join(root, 'scripts', 'run.bat'), path.join(outDir, 'run.bat'));
     }
 
-    // Config sample
+    // Ensure local DB presence for file-based config (e.g., ASTRO_DATABASE_FILE=file:./db/local.db)
+    const dbDirOut = path.join(outDir, 'db');
+    ensureDir(dbDirOut);
+    const localDbSrc = path.join(root, 'db', 'local.db');
+    const localDbOut = path.join(dbDirOut, 'local.db');
+    if (fs.existsSync(localDbSrc)) {
+      copy(localDbSrc, localDbOut);
+    } else {
+      // Create an empty file to allow libsql to open; some drivers create file on first connect
+      writeFile(localDbOut, '');
+    }
+
+    // Config: copy sample and concrete env if present
     const envSamplePath = path.join(root, 'config', '.env.sample');
     if (fs.existsSync(envSamplePath)) {
       copy(envSamplePath, path.join(outDir, 'config', '.env.sample'));
     } else {
-      writeFile(path.join(outDir, 'config', '.env.sample'), 'HOST=127.0.0.1\nPORT=4321\nNODE_ENV=production\n');
+      writeFile(
+        path.join(outDir, 'config', '.env.sample'),
+        [
+          'HOST=127.0.0.1',
+          'PORT=4321',
+          'NODE_ENV=production',
+          '',
+          '# 数据库（可选）：如使用本地文件数据库',
+          '# ASTRO_DATABASE_FILE=file:./db/local.db',
+          '# ASTRO_DB_REMOTE_URL=file:./db/local.db',
+          ''
+        ].join('\n')
+      );
+    }
+    // If root .env exists, ship it as runtime config
+    const rootEnv = path.join(root, '.env');
+    if (fs.existsSync(rootEnv)) {
+      copy(rootEnv, path.join(outDir, 'config', '.env'));
     }
 
     // README-run
@@ -174,6 +296,11 @@ async function main() {
 
     // Licenses
     writeFile(path.join(outDir, 'THIRD_PARTY_LICENSES.txt'), licensesContent);
+
+    // Generate minimal runtime package.json with only external (unbundled) dependencies
+    const externals = findExternalsInDist(path.join(outDir, 'dist', 'server'));
+    console.log(`[package-zip] Detected externals: ${externals.join(', ') || '(none)'}`);
+    createMinimalRuntimePackage(outDir, externals);
 
     // Zip
     const zipName = `${projectName}-${platform}-${version}.zip`;

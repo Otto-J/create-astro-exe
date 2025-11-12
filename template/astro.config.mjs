@@ -14,9 +14,13 @@ export default defineConfig({
     mode: 'standalone'
   }),
 
-  integrations: [db()],
+  integrations: [db({})],
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    ssr: {
+      noExternal: true,
+      external: ['@libsql/client'],
+    }
   }
 })

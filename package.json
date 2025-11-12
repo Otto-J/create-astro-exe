@@ -1,7 +1,7 @@
 {
   "name": "@web.worker/create-astro-exe",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Create Astro applications with a single command",
   "author": "Web Worker Team",
   "license": "MIT",

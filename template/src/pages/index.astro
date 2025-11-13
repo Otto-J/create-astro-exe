@@ -1,242 +1,30 @@
 ---
 import Layout from "../components/Layout.astro";
+const anyAstro = Astro as any;
+const user = await anyAstro.locals.session?.get('user');
 ---
 
-<Layout title="登录 / 注册">
-  <section class="auth-wrap">
-    <div class="paper" data-theme="retro">
-      <div class="container">
-        <header class="header">
-          <h1 class="title">欢迎来到本站</h1>
-          <p class="subtitle">在这里，登录或注册，开启你的人文之旅。</p>
-        </header>
-
-        <div class="tabs tabs-boxed">
-          <input
-            type="radio"
-            name="authTabs"
-            id="tab-login"
-            class="tab"
-            checked
-          />
-          <label for="tab-login" class="tab-label">登录</label>
-          <input type="radio" name="authTabs" id="tab-register" class="tab" />
-          <label for="tab-register" class="tab-label">注册</label>
-        </div>
-
-        <div class="panel">
-          <form class="card shadow login" id="login-form">
-            <div class="card-body">
-              <h2 class="card-title">登录</h2>
-              <div class="form-control">
-                <label class="label"
-                  ><span class="label-text">邮箱或用户名</span></label
-                >
-                <input
-                  type="text"
-                  placeholder="your@email.com"
-                  class="input input-bordered"
-                />
-              </div>
-              <div class="form-control">
-                <label class="label"><span class="label-text">密码</span></label
-                >
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  class="input input-bordered"
-                />
-              </div>
-              <div class="form-control">
-                <label class="cursor-pointer label">
-                  <span class="label-text">记住我</span>
-                  <input type="checkbox" class="checkbox" />
-                </label>
-              </div>
+<Layout title="首页">
+  <section class="min-h-screen flex items-center justify-center py-20">
+    <div class="w-full max-w-2xl px-4">
+      <div class="card bg-base-100 border border-base-300 shadow">
+        <div class="card-body">
+          {user ? (
+            <div>
+              <h2 class="card-title">欢迎，{user.username}</h2>
+              <p>这是你的首页。你可以继续完善内容或开始记录。</p>
               <div class="card-actions">
-                <button class="btn btn-primary">登录</button>
+                <button id="logoutBtn" class="btn btn-outline">退出登录</button>
               </div>
             </div>
-          </form>
-
-          <form class="card shadow register" id="register-form">
-            <div class="card-body">
-              <h2 class="card-title">注册</h2>
-              <div class="form-control">
-                <label class="label"
-                  ><span class="label-text">用户名</span></label
-                >
-                <input
-                  type="text"
-                  placeholder="yourname"
-                  class="input input-bordered"
-                />
-              </div>
-              <div class="form-control">
-                <label class="label"><span class="label-text">邮箱</span></label
-                >
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  class="input input-bordered"
-                />
-              </div>
-              <div class="form-control">
-                <label class="label"><span class="label-text">密码</span></label
-                >
-                <input
-                  type="password"
-                  placeholder="至少 8 位"
-                  class="input input-bordered"
-                />
-              </div>
-              <div class="form-control">
-                <label class="label"
-                  ><span class="label-text">确认密码</span></label
-                >
-                <input
-                  type="password"
-                  placeholder="再次输入密码"
-                  class="input input-bordered"
-                />
-              </div>
-              <div class="form-control">
-                <label class="cursor-pointer label">
-                  <span class="label-text">我已阅读并同意服务条款</span>
-                  <input type="checkbox" class="checkbox" />
-                </label>
-              </div>
-              <div class="card-actions">
-                <button class="btn btn-secondary">注册</button>
-              </div>
+          ) : (
+            <div>
+              <h2 class="card-title">Hello World</h2>
+              <p>欢迎体验。</p>
             </div>
-          </form>
+          )}
         </div>
       </div>
     </div>
   </section>
-
-  <script>
-    // 简单切换逻辑：根据选中的 Tab 显示对应表单
-    const loginRadio = document.getElementById("tab-login");
-    const registerRadio = document.getElementById("tab-register");
-    const loginForm = document.getElementById("login-form");
-    const registerForm = document.getElementById("register-form");
-
-    function updatePanel() {
-      const showLogin = loginRadio.checked;
-      loginForm.style.display = showLogin ? "block" : "none";
-      registerForm.style.display = showLogin ? "none" : "block";
-    }
-
-    loginRadio.addEventListener("change", updatePanel);
-    registerRadio.addEventListener("change", updatePanel);
-    updatePanel();
-  </script>
-
-  <style is:global>
-    @import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&family=Noto+Serif+SC:wght@400;600&display=swap");
-    .auth-wrap {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      background: #f5ece2; /* 温暖的纸张底色 */
-    }
-    .paper {
-      width: min(920px, 92vw);
-      margin: 5vh auto;
-      background: linear-gradient(#fbf3e9, #f7ede3);
-      box-shadow: 0 10px 25px rgba(90, 60, 30, 0.15);
-      border: 1px solid #e2d2bf;
-      border-radius: 12px;
-      position: relative;
-      overflow: hidden;
-    }
-    .paper:before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(
-        rgba(80, 60, 40, 0.06) 1px,
-        transparent 1px
-      );
-      background-size: 6px 6px; /* 细腻的纸纹理 */
-      pointer-events: none;
-    }
-    .container {
-      padding: 2.5rem 2rem;
-    }
-    .header .title {
-      font-family: "Noto Serif SC", "EB Garamond", serif;
-      font-weight: 600;
-      font-size: 2rem;
-      letter-spacing: 0.5px;
-      color: #4b3a2a;
-      text-shadow: 0 1px 0 #fff9f2;
-    }
-    .header .subtitle {
-      margin-top: 0.25rem;
-      font-family: "EB Garamond", serif;
-      color: #6b5846;
-      opacity: 0.9;
-    }
-    .tabs-boxed {
-      display: flex;
-      gap: 0.5rem;
-      margin: 1.5rem 0;
-      align-items: center;
-    }
-    /* 伪装 DaisyUI 的 tabs：使用 label 做外观，radio 控制显示 */
-    .tabs-boxed .tab {
-      display: none;
-    }
-    .tabs-boxed .tab-label {
-      cursor: pointer;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      border: 1px solid #d8c5af;
-      background: #fff7ef;
-      color: #5a4a38;
-      font-family: "EB Garamond", serif;
-      transition: all 0.2s ease;
-    }
-    #tab-login:checked + .tab-label,
-    #tab-register:checked + .tab-label {
-      background: #f2e5d6;
-      border-color: #c9b49c;
-      box-shadow: 0 2px 8px rgba(90, 60, 30, 0.12) inset;
-    }
-    .panel {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-    .card {
-      border-color: #e2d2bf;
-      background: #fffaf3;
-    }
-    .card-title {
-      font-family: "Noto Serif SC", "EB Garamond", serif;
-      color: #4b3a2a;
-    }
-    .label-text {
-      color: #5a4a38;
-    }
-    .input,
-    .checkbox,
-    .btn {
-      font-family: "EB Garamond", serif;
-    }
-    .btn-primary {
-      background-color: #b08968;
-      border-color: #a17855;
-    }
-    .btn-secondary {
-      background-color: #a47c48;
-      border-color: #8f6b3b;
-    }
-    .btn:hover {
-      filter: brightness(1.05);
-    }
-  </style>
 </Layout>

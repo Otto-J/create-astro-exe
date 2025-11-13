@@ -6,6 +6,8 @@ import db from '@astrojs/db';
 
 import tailwindcss from '@tailwindcss/vite';
 
+import vue from '@astrojs/vue';
+
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
@@ -14,13 +16,14 @@ export default defineConfig({
     mode: 'standalone'
   }),
 
-  integrations: [db({})],
+  integrations: [db({}), vue()],
 
   vite: {
     plugins: [tailwindcss()],
     ssr: {
-      noExternal: true,
-      external: ['@libsql/client'],
+      external: process.env.NODE_ENV === 'production'
+        ? ['@libsql/client', 'vue', 'picocolors']
+        : [],
     }
   }
 })

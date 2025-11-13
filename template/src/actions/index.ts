@@ -44,15 +44,19 @@ export const server = {
         });
       }
 
-      // 登录成功，写入 session（持久化到服务端存储）
-      await ctx.session?.set('user', { id: user.id, username: user.username });
+      // 登录成功：将用户信息写入 Cookie（服务端设置，客户端后续请求可读取）
+      ctx.cookies.set('auth', JSON.stringify({ id: user.id, username: user.username }), {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax',
+      });
       return { success: true };
     },
   }),
   // 登出：清理服务端会话中的用户信息
   logout: defineAction({
     handler: async (_input, ctx) => {
-      await ctx.session?.set('user', null);
+      ctx.cookies.delete('auth', { path: '/' });
       return { success: true };
     },
   }),

@@ -4,3 +4,10 @@ node_modules/
 .DS_Store
 deliver
 .astro
+
+# 环境文件
+.env
+.env.local
+.env.production
+.env.test
+config/.env

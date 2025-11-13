@@ -1,6 +1,5 @@
 ---
 import "../styles/global.css";
-import { actions } from "astro:actions";
 export interface Props {
   title: string;
   showNav?: boolean;
@@ -29,7 +28,7 @@ const { title, showNav = true } = Astro.props;
               Demo 笔记
             </a>
           </div>
-          <div class="flex-none gap-2"></div>
+          <div class="flex-none gap-2" />
         </nav>
       ) : null
     }

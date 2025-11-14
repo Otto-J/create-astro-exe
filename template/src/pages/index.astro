@@ -1,7 +1,7 @@
 ---
 import Layout from "../components/Layout.astro";
-const anyAstro = Astro as any;
-const user = await anyAstro.locals.session?.get('user');
+import { getUserFromAstro } from "../utils/auth";
+const user = await getUserFromAstro(Astro);
 ---
 
 <Layout title="首页">

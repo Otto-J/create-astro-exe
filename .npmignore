@@ -48,8 +48,8 @@ Thumbs.db
 *.swo
 
 # Explicitly include special template files to bypass npm ignore
-!template/gitignore.template
-!template/npmrc
+!template/.gitignore.template
+!template/.npmrc.template
 
 # Exclude generated or heavy local artifacts
 my-astro-app/

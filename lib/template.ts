@@ -17,17 +17,14 @@ export class TemplateProcessor {
         await this.copyTemplate(srcPath, targetSubDir, variables)
       }
       else {
-        // 处理特殊文件和 .template 后缀
         let targetName = item
 
         if (item.endsWith('.template')) {
-          // 通用模板文件：去掉 .template 后缀
           targetName = item.slice(0, -'.template'.length)
         }
 
         const targetPath = path.join(targetDir, targetName)
 
-        // 对 JSON/Markdown 文件进行变量替换，其它文件原样复制
         if (targetName.endsWith('.json') || targetName.endsWith('.md')) {
           const content = await fs.readFile(srcPath, 'utf-8')
           const processedContent = this.replaceVariables(content, variables)

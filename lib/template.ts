@@ -20,15 +20,7 @@ export class TemplateProcessor {
         // 处理特殊文件和 .template 后缀
         let targetName = item
 
-        if (item === 'gitignore.template') {
-          // 发布时绕过 npm 忽略规则，生成到用户项目时还原为 .gitignore
-          targetName = '.gitignore'
-        }
-        else if (item === 'npmrc') {
-          // 发布时绕过 npm 忽略规则，生成到用户项目时还原为 .npmrc
-          targetName = '.npmrc'
-        }
-        else if (item.endsWith('.template')) {
+        if (item.endsWith('.template')) {
           // 通用模板文件：去掉 .template 后缀
           targetName = item.slice(0, -'.template'.length)
         }

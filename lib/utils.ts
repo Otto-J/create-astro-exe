@@ -30,6 +30,16 @@ export async function checkDirectoryExists(dirPath: string): Promise<boolean> {
   }
 }
 
+export async function isDirectoryEmpty(dirPath: string): Promise<boolean> {
+  try {
+    const items = await fs.readdir(dirPath)
+    return items.length === 0
+  }
+  catch {
+    return false
+  }
+}
+
 export async function executeCommand(command: string, options: { cwd?: string } = {}): Promise<{ stdout: string, stderr: string }> {
   try {
     const { stdout, stderr } = await execAsync(command, options)

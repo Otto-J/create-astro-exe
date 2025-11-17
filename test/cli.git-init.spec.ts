@@ -24,7 +24,7 @@ describe('cLI git initialization behavior', () => {
     mockedExecuteCommand.mockClear()
   })
 
-  it('initGit 为 true 时仅执行 "git init"，不执行 add/commit', async () => {
+  it('initGit 为 true 时执行 "git init"、"git add -A" 与一次初始 commit', async () => {
     await cli.createProject(targetDir, {
       projectName: 'demo',
       description: '',
@@ -35,10 +35,9 @@ describe('cLI git initialization behavior', () => {
 
     const mockedExecuteCommand = vi.mocked(executeCommand)
     expect(mockedExecuteCommand).toHaveBeenCalledWith('git init', { cwd: targetDir })
-
     const calls: string[] = mockedExecuteCommand.mock.calls.map((args: [string, { cwd?: string }?]) => args[0])
-    expect(calls.some(cmd => cmd.startsWith('git add'))).toBe(false)
-    expect(calls.some(cmd => cmd.startsWith('git commit'))).toBe(false)
+    expect(calls.some(cmd => cmd === 'git add -A')).toBe(true)
+    expect(calls.some(cmd => cmd.includes('git commit') && cmd.includes('feat: init'))).toBe(true)
   })
 
   it('initGit 为 false 时不执行任何 git 命令', async () => {

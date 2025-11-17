@@ -4,7 +4,8 @@ import chalk from 'chalk'
 import inquirer from 'inquirer'
 import ora from 'ora'
 import { TemplateProcessor } from './template'
-import { checkDirectoryExists, executeCommand, validateProjectName } from './utils'
+import { checkDirectoryExists, executeCommand, validateProjectName, isDirectoryEmpty } from './utils'
+import fs from 'fs-extra'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -16,6 +17,7 @@ interface ProjectConfig {
   installDeps: boolean
   packageManager?: 'npm' | 'yarn' | 'pnpm' | 'bun'
   initGit: boolean
+  useTaobaoRegistry?: boolean
 }
 
 export class CLI {
@@ -51,21 +53,38 @@ export class CLI {
       }
     }
 
-    const targetDir = path.resolve(process.cwd(), projectName)
+    let targetDir = path.resolve(process.cwd(), projectName)
 
-    if (await checkDirectoryExists(targetDir)) {
-      const { overwrite } = await inquirer.prompt<{ overwrite: boolean }>([
+    const cwdEmpty = await isDirectoryEmpty(process.cwd())
+    if (cwdEmpty) {
+      const { useCurrentDir } = await inquirer.prompt<{ useCurrentDir: boolean }>([
         {
           type: 'confirm',
-          name: 'overwrite',
-          message: `Directory ${chalk.cyan(projectName)} already exists. Overwrite?`,
-          default: false,
+          name: 'useCurrentDir',
+          message: 'Detected empty current directory. Initialize project here?',
+          default: true,
         },
       ])
+      if (useCurrentDir) {
+        targetDir = process.cwd()
+      }
+    }
 
-      if (!overwrite) {
-        console.log(chalk.yellow('Operation cancelled.'))
-        process.exit(0)
+    if (targetDir !== process.cwd()) {
+      if (await checkDirectoryExists(targetDir)) {
+        const { overwrite } = await inquirer.prompt<{ overwrite: boolean }>([
+          {
+            type: 'confirm',
+            name: 'overwrite',
+            message: `Directory ${chalk.cyan(projectName)} already exists. Overwrite?`,
+            default: false,
+          },
+        ])
+
+        if (!overwrite) {
+          console.log(chalk.yellow('Operation cancelled.'))
+          process.exit(0)
+        }
       }
     }
 
@@ -86,22 +105,17 @@ export class CLI {
 
     const answers = await inquirer.prompt([
       {
-        type: 'input',
-        name: 'description',
-        message: 'Project description:',
-        default: `${projectName} - Astro application`,
-      },
-      {
-        type: 'input',
-        name: 'author',
-        message: 'Author name:',
-        default: defaultAuthor || '',
-      },
-      {
         type: 'confirm',
         name: 'installDeps',
         message: 'Install dependencies?',
         default: true,
+      },
+      {
+        type: 'confirm',
+        name: 'useTaobaoRegistry',
+        message: 'Use Taobao registry mirror to speed up installs?',
+        default: true,
+        when: (answers: any) => answers.installDeps === true,
       },
       {
         type: 'list',
@@ -121,6 +135,8 @@ export class CLI {
 
     return {
       projectName,
+      description: `${projectName} - Astro application`,
+      author: defaultAuthor || '',
       ...answers,
     }
   }
@@ -137,17 +153,31 @@ export class CLI {
         description: config.description,
         author: config.author,
       })
+      if (config.installDeps && config.useTaobaoRegistry === false) {
+        try {
+          await fs.remove(path.join(targetDir, '.npmrc'))
+        }
+        catch {}
+      }
 
       if (config.installDeps) {
         spinner.text = 'Installing dependencies...'
         const pm = config.packageManager || 'npm'
-        const installCmd = pm === 'yarn' ? 'yarn' : pm === 'bun' ? 'bun install' : `${pm} install`
+        let installCmd = pm === 'yarn' ? 'yarn' : pm === 'bun' ? 'bun install' : `${pm} install`
+        if (config.useTaobaoRegistry && (pm === 'npm' || pm === 'pnpm')) {
+          installCmd = `${installCmd} --registry https://registry.npmmirror.com/`
+        }
         await executeCommand(installCmd, { cwd: targetDir })
       }
 
       if (config.initGit) {
         spinner.text = 'Initializing git repository...'
         await executeCommand('git init', { cwd: targetDir })
+        try {
+          await executeCommand('git add -A', { cwd: targetDir })
+          await executeCommand('git commit -m "feat: init"', { cwd: targetDir })
+        }
+        catch {}
       }
 
       spinner.succeed('Project created successfully!')

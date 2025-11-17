@@ -36,7 +36,7 @@ describe('cLI git initialization behavior', () => {
     const mockedExecuteCommand = vi.mocked(executeCommand)
     expect(mockedExecuteCommand).toHaveBeenCalledWith('git init', { cwd: targetDir })
     const calls: string[] = mockedExecuteCommand.mock.calls.map((args: [string, { cwd?: string }?]) => args[0])
-    expect(calls.some(cmd => cmd === 'git add -A')).toBe(true)
+    expect(calls.includes('git add -A')).toBe(true)
     expect(calls.some(cmd => cmd.includes('git commit') && cmd.includes('feat: init'))).toBe(true)
   })
 

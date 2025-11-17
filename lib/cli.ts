@@ -1,11 +1,11 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import chalk from 'chalk'
+import fs from 'fs-extra'
 import inquirer from 'inquirer'
 import ora from 'ora'
 import { TemplateProcessor } from './template'
-import { checkDirectoryExists, executeCommand, validateProjectName, isDirectoryEmpty } from './utils'
-import fs from 'fs-extra'
+import { checkDirectoryExists, executeCommand, isDirectoryEmpty, validateProjectName } from './utils'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

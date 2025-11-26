@@ -120,6 +120,10 @@ ASTRO_DB_REMOTE_URL=file:./data/test-database.db
 如果你有疑问应当，查看 astro db 文档
 https://docs.astro.build/zh-cn/guides/astro-db/
 
+### astro 服务端日志
+
+编写代码时候，默认考虑
+
 ## 相关文档
 
 daisyUI 组件文档

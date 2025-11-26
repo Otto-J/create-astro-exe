@@ -106,7 +106,7 @@ function generateLicenses() {
       }
       return lines.join('\n') + '\n';
     }
-  } catch {}
+  } catch { }
   const pkg = readJSON(path.join(root, 'package.json'));
   const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
   const lines = ['依赖列表（未解析具体许可证）：'];
@@ -119,7 +119,7 @@ function generateLicenses() {
 // Find external (unbundled) packages by scanning dist/server code
 function findExternalsInDist(distServerDir) {
   const builtins = new Set([
-    'node:fs','fs','node:path','path','node:url','url','node:http','http','node:https','https','node:net','net','node:os','os','node:stream','stream','node:zlib','zlib','events','crypto','buffer','timers','tty','child_process','cluster','dns','module','process','worker_threads'
+    'node:fs', 'fs', 'node:path', 'path', 'node:url', 'url', 'node:http', 'http', 'node:https', 'https', 'node:net', 'net', 'node:os', 'os', 'node:stream', 'stream', 'node:zlib', 'zlib', 'events', 'crypto', 'buffer', 'timers', 'tty', 'child_process', 'cluster', 'dns', 'module', 'process', 'worker_threads'
   ]);
   const exts = new Set();
   const isBare = (s) => s && !s.startsWith('.') && !s.startsWith('/') && !s.startsWith('data:') && !s.startsWith('node:');
@@ -162,7 +162,7 @@ function resolveInstalledVersion(pkgName) {
       const version = dep && (dep.version || dep.from);
       if (version) return version;
     }
-  } catch {}
+  } catch { }
   return null;
 }
 
@@ -249,7 +249,7 @@ async function main() {
     if (platform === 'mac') {
       copy(path.join(root, 'scripts', 'run.command'), path.join(outDir, 'run.command'));
       // chmod +x
-      try { fs.chmodSync(path.join(outDir, 'run.command'), 0o755); } catch {}
+      try { fs.chmodSync(path.join(outDir, 'run.command'), 0o755); } catch { }
     } else {
       copy(path.join(root, 'scripts', 'run.bat'), path.join(outDir, 'run.bat'));
     }
@@ -271,24 +271,40 @@ async function main() {
     if (fs.existsSync(envSamplePath)) {
       copy(envSamplePath, path.join(outDir, 'config', '.env.sample'));
     } else {
-      writeFile(
-        path.join(outDir, 'config', '.env.sample'),
-        [
-          'HOST=127.0.0.1',
-          'PORT=4321',
-          'NODE_ENV=production',
-          '',
-          '# 数据库（可选）：如使用本地文件数据库',
-          '# ASTRO_DATABASE_FILE=file:./db/local.db',
-          '# ASTRO_DB_REMOTE_URL=file:./db/local.db',
-          ''
-        ].join('\n')
-      );
+      const envExamplePath = path.join(root, 'env.example');
+      if (fs.existsSync(envExamplePath)) {
+        copy(envExamplePath, path.join(outDir, 'config', '.env.sample'));
+      } else {
+        writeFile(
+          path.join(outDir, 'config', '.env.sample'),
+          [
+            'HOST=127.0.0.1',
+            'PORT=4321',
+            'NODE_ENV=production',
+            '',
+            '# 数据库（可选）：如使用本地文件数据库',
+            '# ASTRO_DATABASE_FILE=file:./db/local.db',
+            '# ASTRO_DB_REMOTE_URL=file:./db/local.db',
+            ''
+          ].join('\n')
+        );
+      }
     }
     // If root .env exists, ship it as runtime config
     const rootEnv = path.join(root, '.env');
     if (fs.existsSync(rootEnv)) {
       copy(rootEnv, path.join(outDir, 'config', '.env'));
+    }
+
+    // Ensure a config/.env exists even if root .env is missing
+    const outEnvPath = path.join(outDir, 'config', '.env');
+    if (!fs.existsSync(outEnvPath)) {
+      const outEnvSample = path.join(outDir, 'config', '.env.sample');
+      if (fs.existsSync(outEnvSample)) {
+        copy(outEnvSample, outEnvPath);
+      } else {
+        writeFile(outEnvPath, ['HOST=127.0.0.1', 'PORT=4321', 'NODE_ENV=production'].join('\n'));
+      }
     }
 
     // README-run
